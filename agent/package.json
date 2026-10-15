@@ -1,0 +1,15 @@
+{
+  "name": "dailyred-agent",
+  "private": true,
+  "type": "module",
+  "description": "Plays Daily Red against RED, using Jev (TypeSafe) to pick each move and switch",
+  "scripts": {
+    "play": "node play.mjs"
+  },
+  "dependencies": {
+    "@typesafe-ai/sdk": "0.6.0",
+    "braintrust": "3.36.0",
+    "openai": "7.32.0",
+    "playwright-core": "1.56.1"
+  }
+}
