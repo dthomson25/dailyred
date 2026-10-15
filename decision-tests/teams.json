@@ -1,0 +1,1382 @@
+{
+ "777": [
+  {
+   "species": 195,
+   "speciesName": "Quagsire",
+   "level": 100,
+   "hp": 390,
+   "maxHp": 390,
+   "stats": {
+    "atk": 264,
+    "def": 181,
+    "spe": 102,
+    "spa": 179,
+    "spd": 163
+   },
+   "moves": [
+    218,
+    57,
+    89,
+    156
+   ],
+   "pp": [
+    20,
+    15,
+    10,
+    10
+   ],
+   "ivs": [
+    27,
+    26,
+    26,
+    27,
+    28,
+    28
+   ],
+   "stages": [
+    6,
+    6,
+    6,
+    6,
+    6,
+    6,
+    6,
+    6
+   ],
+   "ability": 11,
+   "types": [
+    11,
+    4
+   ],
+   "friendship": 70,
+   "item": 219,
+   "personality": 643116491,
+   "status1": 0,
+   "status2": 0,
+   "disabledMove": 0,
+   "tauntTurns": 0,
+   "encoredMove": 0,
+   "choicedMove": 0,
+   "lastMove": 0,
+   "substituteHp": 0,
+   "protectUses": 0,
+   "leechSeeded": false,
+   "perishCount": null
+  },
+  {
+   "slot": 1,
+   "species": 411,
+   "speciesName": "Chimecho",
+   "level": 100,
+   "hp": 267,
+   "maxHp": 267,
+   "stats": {
+    "atk": 130,
+    "def": 236,
+    "spe": 161,
+    "spa": 226,
+    "spd": 254
+   },
+   "moves": [
+    285,
+    290,
+    149,
+    156
+   ],
+   "pp": [
+    10,
+    20,
+    15,
+    10
+   ],
+   "ivs": [
+    26,
+    25,
+    28,
+    26,
+    31,
+    26
+   ],
+   "stages": [
+    6,
+    6,
+    6,
+    6,
+    6,
+    6,
+    6,
+    6
+   ],
+   "ability": 26,
+   "types": [
+    14,
+    14
+   ],
+   "friendship": 70,
+   "item": 180,
+   "personality": 644849999,
+   "status1": 0,
+   "status2": 0,
+   "lastMove": 0
+  },
+  {
+   "slot": 2,
+   "species": 127,
+   "speciesName": "Pinsir",
+   "level": 100,
+   "hp": 266,
+   "maxHp": 266,
+   "stats": {
+    "atk": 349,
+    "def": 298,
+    "spe": 223,
+    "spa": 130,
+    "spd": 172
+   },
+   "moves": [
+    156,
+    263,
+    11,
+    91
+   ],
+   "pp": [
+    10,
+    20,
+    30,
+    10
+   ],
+   "ivs": [
+    25,
+    31,
+    30,
+    28,
+    30,
+    27
+   ],
+   "stages": [
+    6,
+    6,
+    6,
+    6,
+    6,
+    6,
+    6,
+    6
+   ],
+   "ability": 52,
+   "types": [
+    6,
+    6
+   ],
+   "friendship": 70,
+   "item": 134,
+   "personality": 1604290363,
+   "status1": 0,
+   "status2": 0,
+   "lastMove": 0
+  },
+  {
+   "slot": 3,
+   "species": 135,
+   "speciesName": "Jolteon",
+   "level": 100,
+   "hp": 269,
+   "maxHp": 269,
+   "stats": {
+    "atk": 166,
+    "def": 166,
+    "spe": 358,
+    "spa": 227,
+    "spd": 289
+   },
+   "moves": [
+    182,
+    216,
+    24,
+    46
+   ],
+   "pp": [
+    10,
+    20,
+    30,
+    20
+   ],
+   "ivs": [
+    28,
+    31,
+    26,
+    30,
+    28,
+    31
+   ],
+   "stages": [
+    6,
+    6,
+    6,
+    6,
+    6,
+    6,
+    6,
+    6
+   ],
+   "ability": 10,
+   "types": [
+    13,
+    13
+   ],
+   "friendship": 70,
+   "item": 196,
+   "personality": 3767604183,
+   "status1": 0,
+   "status2": 0,
+   "lastMove": 0
+  },
+  {
+   "slot": 4,
+   "species": 248,
+   "speciesName": "Tyranitar",
+   "level": 100,
+   "hp": 338,
+   "maxHp": 338,
+   "stats": {
+    "atk": 401,
+    "def": 314,
+    "spe": 152,
+    "spa": 221,
+    "spd": 212
+   },
+   "moves": [
+    240,
+    92,
+    184,
+    249
+   ],
+   "pp": [
+    5,
+    10,
+    10,
+    15
+   ],
+   "ivs": [
+    27,
+    29,
+    26,
+    25,
+    26,
+    31
+   ],
+   "stages": [
+    6,
+    6,
+    6,
+    6,
+    6,
+    6,
+    6,
+    6
+   ],
+   "ability": 45,
+   "types": [
+    5,
+    17
+   ],
+   "friendship": 35,
+   "item": 219,
+   "personality": 3689439004,
+   "status1": 0,
+   "status2": 0,
+   "lastMove": 0
+  },
+  {
+   "slot": 5,
+   "species": 40,
+   "speciesName": "Wigglytuff",
+   "level": 100,
+   "hp": 478,
+   "maxHp": 478,
+   "stats": {
+    "atk": 234,
+    "def": 108,
+    "spe": 120,
+    "spa": 183,
+    "spd": 147
+   },
+   "moves": [
+    113,
+    280,
+    115,
+    50
+   ],
+   "pp": [
+    30,
+    15,
+    20,
+    20
+   ],
+   "ivs": [
+    25,
+    26,
+    26,
+    25,
+    28,
+    28
+   ],
+   "stages": [
+    6,
+    6,
+    6,
+    6,
+    6,
+    6,
+    6,
+    6
+   ],
+   "ability": 56,
+   "types": [
+    0,
+    0
+   ],
+   "friendship": 70,
+   "item": 171,
+   "personality": 2219214971,
+   "status1": 0,
+   "status2": 0,
+   "lastMove": 0
+  }
+ ],
+ "1234": [
+  {
+   "species": 68,
+   "speciesName": "Machamp",
+   "level": 100,
+   "hp": 380,
+   "maxHp": 380,
+   "stats": {
+    "atk": 390,
+    "def": 195,
+    "spe": 141,
+    "spa": 162,
+    "spd": 181
+   },
+   "moves": [
+    193,
+    280,
+    126,
+    69
+   ],
+   "pp": [
+    40,
+    15,
+    5,
+    20
+   ],
+   "ivs": [
+    27,
+    27,
+    30,
+    26,
+    27,
+    26
+   ],
+   "stages": [
+    6,
+    6,
+    6,
+    6,
+    6,
+    6,
+    6,
+    6
+   ],
+   "ability": 62,
+   "types": [
+    1,
+    1
+   ],
+   "friendship": 70,
+   "item": 215,
+   "personality": 2600396279,
+   "status1": 0,
+   "status2": 0,
+   "disabledMove": 0,
+   "tauntTurns": 0,
+   "encoredMove": 0,
+   "choicedMove": 0,
+   "lastMove": 0,
+   "substituteHp": 0,
+   "protectUses": 0,
+   "leechSeeded": false,
+   "perishCount": null
+  },
+  {
+   "slot": 1,
+   "species": 168,
+   "speciesName": "Ariados",
+   "level": 100,
+   "hp": 342,
+   "maxHp": 342,
+   "stats": {
+    "atk": 276,
+    "def": 153,
+    "spe": 114,
+    "spa": 170,
+    "spd": 154
+   },
+   "moves": [
+    63,
+    241,
+    101,
+    81
+   ],
+   "pp": [
+    5,
+    5,
+    15,
+    40
+   ],
+   "ivs": [
+    29,
+    28,
+    25,
+    29,
+    30,
+    29
+   ],
+   "stages": [
+    6,
+    6,
+    6,
+    6,
+    6,
+    6,
+    6,
+    6
+   ],
+   "ability": 68,
+   "types": [
+    6,
+    3
+   ],
+   "friendship": 70,
+   "item": 134,
+   "personality": 2310663316,
+   "status1": 0,
+   "status2": 0,
+   "lastMove": 0
+  },
+  {
+   "slot": 2,
+   "species": 376,
+   "speciesName": "Absol",
+   "level": 100,
+   "hp": 269,
+   "maxHp": 269,
+   "stats": {
+    "atk": 293,
+    "def": 168,
+    "spe": 247,
+    "spa": 246,
+    "spd": 135
+   },
+   "moves": [
+    59,
+    182,
+    195,
+    241
+   ],
+   "pp": [
+    5,
+    10,
+    5,
+    5
+   ],
+   "ivs": [
+    28,
+    28,
+    28,
+    29,
+    28,
+    26
+   ],
+   "stages": [
+    6,
+    6,
+    6,
+    6,
+    6,
+    6,
+    6,
+    6
+   ],
+   "ability": 46,
+   "types": [
+    17,
+    17
+   ],
+   "friendship": 35,
+   "item": 187,
+   "personality": 3905352384,
+   "status1": 0,
+   "status2": 0,
+   "lastMove": 0
+  },
+  {
+   "slot": 3,
+   "species": 205,
+   "speciesName": "Forretress",
+   "level": 100,
+   "hp": 286,
+   "maxHp": 286,
+   "stats": {
+    "atk": 278,
+    "def": 374,
+    "spe": 114,
+    "spa": 156,
+    "spd": 156
+   },
+   "moves": [
+    290,
+    218,
+    120,
+    237
+   ],
+   "pp": [
+    20,
+    20,
+    5,
+    15
+   ],
+   "ivs": [
+    25,
+    30,
+    26,
+    29,
+    31,
+    31
+   ],
+   "stages": [
+    6,
+    6,
+    6,
+    6,
+    6,
+    6,
+    6,
+    6
+   ],
+   "ability": 5,
+   "types": [
+    6,
+    8
+   ],
+   "friendship": 70,
+   "item": 196,
+   "personality": 2284194393,
+   "status1": 0,
+   "status2": 0,
+   "lastMove": 0
+  },
+  {
+   "slot": 4,
+   "species": 214,
+   "speciesName": "Heracross",
+   "level": 100,
+   "hp": 301,
+   "maxHp": 301,
+   "stats": {
+    "atk": 349,
+    "def": 185,
+    "spe": 181,
+    "spa": 124,
+    "spd": 285
+   },
+   "moves": [
+    224,
+    218,
+    63,
+    36
+   ],
+   "pp": [
+    10,
+    20,
+    5,
+    20
+   ],
+   "ivs": [
+    30,
+    31,
+    30,
+    27,
+    28,
+    27
+   ],
+   "stages": [
+    6,
+    6,
+    6,
+    6,
+    6,
+    6,
+    6,
+    6
+   ],
+   "ability": 62,
+   "types": [
+    6,
+    1
+   ],
+   "friendship": 70,
+   "item": 180,
+   "personality": 4239265517,
+   "status1": 0,
+   "status2": 0,
+   "lastMove": 0
+  },
+  {
+   "slot": 5,
+   "species": 329,
+   "speciesName": "Milotic",
+   "level": 100,
+   "hp": 328,
+   "maxHp": 328,
+   "stats": {
+    "atk": 150,
+    "def": 189,
+    "spe": 198,
+    "spa": 297,
+    "spd": 344
+   },
+   "moves": [
+    291,
+    59,
+    156,
+    352
+   ],
+   "pp": [
+    10,
+    5,
+    10,
+    20
+   ],
+   "ivs": [
+    27,
+    25,
+    26,
+    31,
+    29,
+    26
+   ],
+   "stages": [
+    6,
+    6,
+    6,
+    6,
+    6,
+    6,
+    6,
+    6
+   ],
+   "ability": 63,
+   "types": [
+    11,
+    11
+   ],
+   "friendship": 70,
+   "item": 183,
+   "personality": 753572700,
+   "status1": 0,
+   "status2": 0,
+   "lastMove": 0
+  }
+ ],
+ "2026": [
+  {
+   "species": 169,
+   "speciesName": "Crobat",
+   "level": 100,
+   "hp": 308,
+   "maxHp": 308,
+   "stats": {
+    "atk": 278,
+    "def": 191,
+    "spe": 354,
+    "spa": 174,
+    "spd": 194
+   },
+   "moves": [
+    247,
+    289,
+    213,
+    44
+   ],
+   "pp": [
+    15,
+    10,
+    15,
+    25
+   ],
+   "ivs": [
+    27,
+    30,
+    26,
+    26,
+    29,
+    29
+   ],
+   "stages": [
+    6,
+    6,
+    6,
+    6,
+    6,
+    6,
+    6,
+    6
+   ],
+   "ability": 39,
+   "types": [
+    3,
+    2
+   ],
+   "friendship": 70,
+   "item": 186,
+   "personality": 1001770500,
+   "status1": 0,
+   "status2": 0,
+   "disabledMove": 0,
+   "tauntTurns": 0,
+   "encoredMove": 0,
+   "choicedMove": 0,
+   "lastMove": 0,
+   "substituteHp": 0,
+   "protectUses": 0,
+   "leechSeeded": false,
+   "perishCount": null
+  },
+  {
+   "slot": 1,
+   "species": 3,
+   "speciesName": "Venusaur",
+   "level": 100,
+   "hp": 296,
+   "maxHp": 296,
+   "stats": {
+    "atk": 194,
+    "def": 201,
+    "spe": 172,
+    "spa": 325,
+    "spd": 296
+   },
+   "moves": [
+    104,
+    76,
+    188,
+    77
+   ],
+   "pp": [
+    15,
+    10,
+    10,
+    35
+   ],
+   "ivs": [
+    25,
+    25,
+    30,
+    27,
+    28,
+    28
+   ],
+   "stages": [
+    6,
+    6,
+    6,
+    6,
+    6,
+    6,
+    6,
+    6
+   ],
+   "ability": 65,
+   "types": [
+    12,
+    3
+   ],
+   "friendship": 70,
+   "item": 168,
+   "personality": 28164367,
+   "status1": 0,
+   "status2": 0,
+   "lastMove": 0
+  },
+  {
+   "slot": 2,
+   "species": 347,
+   "speciesName": "Glalie",
+   "level": 100,
+   "hp": 301,
+   "maxHp": 301,
+   "stats": {
+    "atk": 195,
+    "def": 196,
+    "spe": 254,
+    "spa": 254,
+    "spd": 191
+   },
+   "moves": [
+    182,
+    113,
+    196,
+    58
+   ],
+   "pp": [
+    10,
+    30,
+    15,
+    10
+   ],
+   "ivs": [
+    30,
+    30,
+    31,
+    26,
+    26,
+    26
+   ],
+   "stages": [
+    6,
+    6,
+    6,
+    6,
+    6,
+    6,
+    6,
+    6
+   ],
+   "ability": 39,
+   "types": [
+    15,
+    15
+   ],
+   "friendship": 70,
+   "item": 142,
+   "personality": 1746093868,
+   "status1": 0,
+   "status2": 0,
+   "lastMove": 0
+  },
+  {
+   "slot": 3,
+   "species": 38,
+   "speciesName": "Ninetales",
+   "level": 100,
+   "hp": 285,
+   "maxHp": 285,
+   "stats": {
+    "atk": 182,
+    "def": 180,
+    "spe": 299,
+    "spa": 194,
+    "spd": 296
+   },
+   "moves": [
+    182,
+    63,
+    263,
+    213
+   ],
+   "pp": [
+    10,
+    5,
+    20,
+    15
+   ],
+   "ivs": [
+    28,
+    25,
+    25,
+    31,
+    27,
+    28
+   ],
+   "stages": [
+    6,
+    6,
+    6,
+    6,
+    6,
+    6,
+    6,
+    6
+   ],
+   "ability": 18,
+   "types": [
+    10,
+    10
+   ],
+   "friendship": 70,
+   "item": 179,
+   "personality": 2318273825,
+   "status1": 0,
+   "status2": 0,
+   "lastMove": 0
+  },
+  {
+   "slot": 4,
+   "species": 339,
+   "speciesName": "Numel",
+   "level": 100,
+   "hp": 322,
+   "maxHp": 322,
+   "stats": {
+    "atk": 219,
+    "def": 111,
+    "spe": 106,
+    "spa": 166,
+    "spd": 127
+   },
+   "moves": [
+    237,
+    38,
+    201,
+    213
+   ],
+   "pp": [
+    15,
+    15,
+    10,
+    15
+   ],
+   "ivs": [
+    29,
+    31,
+    26,
+    31,
+    31,
+    31
+   ],
+   "stages": [
+    6,
+    6,
+    6,
+    6,
+    6,
+    6,
+    6,
+    6
+   ],
+   "ability": 12,
+   "types": [
+    10,
+    4
+   ],
+   "friendship": 70,
+   "item": 219,
+   "personality": 1003894625,
+   "status1": 0,
+   "status2": 0,
+   "lastMove": 0
+  },
+  {
+   "slot": 5,
+   "species": 117,
+   "speciesName": "Seadra",
+   "level": 100,
+   "hp": 248,
+   "maxHp": 248,
+   "stats": {
+    "atk": 166,
+    "def": 285,
+    "spe": 225,
+    "spa": 283,
+    "spd": 110
+   },
+   "moves": [
+    258,
+    239,
+    56,
+    57
+   ],
+   "pp": [
+    10,
+    20,
+    5,
+    15
+   ],
+   "ivs": [
+    27,
+    31,
+    27,
+    30,
+    25,
+    28
+   ],
+   "stages": [
+    6,
+    6,
+    6,
+    6,
+    6,
+    6,
+    6,
+    6
+   ],
+   "ability": 38,
+   "types": [
+    11,
+    11
+   ],
+   "friendship": 70,
+   "item": 179,
+   "personality": 2992428639,
+   "status1": 0,
+   "status2": 0,
+   "lastMove": 0
+  }
+ ],
+ "4159547863": [
+  {
+   "species": 51,
+   "speciesName": "Dugtrio",
+   "level": 100,
+   "hp": 212,
+   "maxHp": 212,
+   "stats": {
+    "atk": 259,
+    "def": 133,
+    "spe": 338,
+    "spa": 133,
+    "spd": 176
+   },
+   "moves": [
+    63,
+    237,
+    168,
+    332
+   ],
+   "pp": [
+    5,
+    15,
+    10,
+    20
+   ],
+   "ivs": [
+    31,
+    31,
+    28,
+    30,
+    28,
+    31
+   ],
+   "stages": [
+    6,
+    6,
+    6,
+    6,
+    6,
+    6,
+    6,
+    6
+   ],
+   "ability": 8,
+   "types": [
+    4,
+    4
+   ],
+   "friendship": 70,
+   "item": 196,
+   "personality": 1267127806,
+   "status1": 0,
+   "status2": 0,
+   "disabledMove": 0,
+   "tauntTurns": 0,
+   "encoredMove": 0,
+   "choicedMove": 0,
+   "lastMove": 0,
+   "substituteHp": 0,
+   "protectUses": 0,
+   "leechSeeded": false,
+   "perishCount": null
+  },
+  {
+   "slot": 1,
+   "species": 329,
+   "speciesName": "Milotic",
+   "level": 100,
+   "hp": 332,
+   "maxHp": 332,
+   "stats": {
+    "atk": 170,
+    "def": 193,
+    "spe": 174,
+    "spa": 296,
+    "spd": 348
+   },
+   "moves": [
+    55,
+    237,
+    92,
+    239
+   ],
+   "pp": [
+    25,
+    15,
+    10,
+    20
+   ],
+   "ivs": [
+    31,
+    30,
+    30,
+    27,
+    28,
+    30
+   ],
+   "stages": [
+    6,
+    6,
+    6,
+    6,
+    6,
+    6,
+    6,
+    6
+   ],
+   "ability": 63,
+   "types": [
+    11,
+    11
+   ],
+   "friendship": 70,
+   "item": 209,
+   "personality": 398372727,
+   "status1": 0,
+   "status2": 0,
+   "lastMove": 0
+  },
+  {
+   "slot": 2,
+   "species": 44,
+   "speciesName": "Gloom",
+   "level": 100,
+   "hp": 261,
+   "maxHp": 261,
+   "stats": {
+    "atk": 163,
+    "def": 157,
+    "spe": 116,
+    "spa": 263,
+    "spd": 273
+   },
+   "moves": [
+    218,
+    77,
+    71,
+    263
+   ],
+   "pp": [
+    20,
+    35,
+    20,
+    20
+   ],
+   "ivs": [
+    30,
+    28,
+    30,
+    31,
+    25,
+    31
+   ],
+   "stages": [
+    6,
+    6,
+    6,
+    6,
+    6,
+    6,
+    6,
+    6
+   ],
+   "ability": 34,
+   "types": [
+    12,
+    3
+   ],
+   "friendship": 70,
+   "item": 168,
+   "personality": 772201146,
+   "status1": 0,
+   "status2": 0,
+   "lastMove": 0
+  },
+  {
+   "slot": 3,
+   "species": 124,
+   "speciesName": "Jynx",
+   "level": 100,
+   "hp": 268,
+   "maxHp": 268,
+   "stats": {
+    "atk": 130,
+    "def": 105,
+    "spe": 254,
+    "spa": 328,
+    "spd": 245
+   },
+   "moves": [
+    182,
+    8,
+    352,
+    148
+   ],
+   "pp": [
+    10,
+    15,
+    20,
+    20
+   ],
+   "ivs": [
+    27,
+    25,
+    30,
+    25,
+    30,
+    28
+   ],
+   "stages": [
+    6,
+    6,
+    6,
+    6,
+    6,
+    6,
+    6,
+    6
+   ],
+   "ability": 12,
+   "types": [
+    15,
+    14
+   ],
+   "friendship": 70,
+   "item": 168,
+   "personality": 2699863697,
+   "status1": 0,
+   "status2": 0,
+   "lastMove": 0
+  },
+  {
+   "slot": 4,
+   "species": 212,
+   "speciesName": "Scizor",
+   "level": 100,
+   "hp": 281,
+   "maxHp": 281,
+   "stats": {
+    "atk": 353,
+    "def": 267,
+    "spe": 161,
+    "spa": 158,
+    "spd": 192
+   },
+   "moves": [
+    14,
+    163,
+    206,
+    15
+   ],
+   "pp": [
+    30,
+    20,
+    40,
+    30
+   ],
+   "ivs": [
+    30,
+    25,
+    29,
+    26,
+    29,
+    27
+   ],
+   "stages": [
+    6,
+    6,
+    6,
+    6,
+    6,
+    6,
+    6,
+    6
+   ],
+   "ability": 68,
+   "types": [
+    6,
+    8
+   ],
+   "friendship": 70,
+   "item": 168,
+   "personality": 353959516,
+   "status1": 0,
+   "status2": 0,
+   "lastMove": 0
+  },
+  {
+   "slot": 5,
+   "species": 229,
+   "speciesName": "Houndoom",
+   "level": 100,
+   "hp": 287,
+   "maxHp": 287,
+   "stats": {
+    "atk": 274,
+    "def": 132,
+    "spe": 314,
+    "spa": 256,
+    "spd": 172
+   },
+   "moves": [
+    269,
+    92,
+    63,
+    46
+   ],
+   "pp": [
+    20,
+    10,
+    5,
+    20
+   ],
+   "ivs": [
+    26,
+    26,
+    27,
+    28,
+    31,
+    27
+   ],
+   "stages": [
+    6,
+    6,
+    6,
+    6,
+    6,
+    6,
+    6,
+    6
+   ],
+   "ability": 18,
+   "types": [
+    17,
+    10
+   ],
+   "friendship": 35,
+   "item": 217,
+   "personality": 3085287389,
+   "status1": 0,
+   "status2": 0,
+   "lastMove": 0
+  }
+ ]
+}
