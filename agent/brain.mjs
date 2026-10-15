@@ -20,7 +20,12 @@ import { estimateDamage, effectiveSpeed, resolveMove, STAGE } from './damage.mjs
 const pct = (n, of) => (n > 0 ? Math.max(1, Math.round((100 * n) / of)) : 0);
 
 export function statusText(status1) {
-  if (status1 & 0x7) return 'asleep';
+  // The sleep counter drops each turn the Pokémon tries to move; it wakes and
+  // acts when it reaches 0, so it loses (counter - 1) more turns.
+  if (status1 & 0x7) {
+    const lost = (status1 & 0x7) - 1;
+    return lost ? `asleep (can't act for about ${lost} more turn${lost === 1 ? '' : 's'})` : 'asleep (wakes up and acts this turn)';
+  }
   if (status1 & 0x80) return 'badly poisoned';
   if (status1 & 0x8) return 'poisoned';
   if (status1 & 0x10) return 'burned';
@@ -1295,6 +1300,39 @@ export function turnState(battle) {
   const full = fullTurnState(battle);
   return stateStyle === 'lean' ? leanState(full) : full;
 }
+// For each of RED's Pokémon still standing: your best answer to it right now
+// (current HP, PP and status), from the same one-on-one simulation as the
+// options. The same for every option, so it lives in the state: it shows when
+// a choice would spend the only answer to a later fight.
+// A Pokémon's best plan against `r`: attacking right away, or one setup move
+// (a stat boost or Toxic) first, whichever wins more often.
+function bestPlan(m, r, field) {
+  let best = { p: exchange(m, r, field)?.pWin ?? 0, setup: null };
+  m.moves.forEach((id, i) => {
+    if (!id || (m.pp && m.pp[i] <= 0)) return;
+    const move = MOVE_DATA.get(id);
+    if (!(SELF_BOOSTS[move.effect] && move.effect !== 'CURSE') && move.effect !== 'TOXIC') return;
+    if (move.effect === 'TOXIC' && failureReason(id, m, r)) return;
+    const p = exchange(m, r, field, m.hp, [id])?.pWin ?? 0;
+    if (p > best.p + 0.05) best = { p, setup: move.name };
+  });
+  return best;
+}
+
+function threatBoard(battle) {
+  const { you, foe, bench, foeTeam, field } = battle;
+  const ours = [you, ...bench].filter((m) => m.hp > 0);
+  const reds = (foeTeam ?? []).map((m) => (m.active ? foe : m)).filter((m) => m.hp > 0);
+  return reds.map((r) => {
+    const ranked = ours.map((m) => ({ m, ...bestPlan(m, r, field) })).sort((a, b) => b.p - a.p);
+    const [best, next] = ranked;
+    const how = (x) => (x.setup ? `, with ${x.setup} first` : '');
+    const label = `${r.speciesName} (HP ${pct(r.hp, r.maxHp)}%${r === foe ? ', in battle now' : ''})`;
+    if (!best || best.p < 0.5) return `${label}: none of your Pokémon wins a one-on-one${best ? ` (best: ${best.m.speciesName}, about ${pctOf(best.p)}%)` : ''}`;
+    return `${label}: best answer ${best.m.speciesName} (wins about ${pctOf(best.p)}%${how(best)})${next && next.p >= 0.5 ? `; also ${next.m.speciesName} (${pctOf(next.p)}%${how(next)})` : '; the only one that wins'}`;
+  });
+}
+
 function fullTurnState(battle) {
   const { you, foe, bench, foeTeam, fainted, field, history = [] } = battle;
   const notes = [];
@@ -1319,6 +1357,7 @@ function fullTurnState(battle) {
     your_other_pokemon: bench.map((m) => `${m.speciesName} (${typesText(m.types)}, HP ${pct(m.hp, m.maxHp)}%, ${statusText(m.status1)})`),
     your_fainted_pokemon: fainted.map((m) => m.speciesName),
     red_other_pokemon: foeTeam.filter((m) => !m.active).map((m) => `${m.speciesName} (${typesText(m.types)}, ${m.hp ? `HP ${pct(m.hp, m.maxHp)}%` : 'fainted'})`),
+    red_threats: threatBoard(battle),
     field: { weather: weather.join(', ') || 'clear', your_side: sideText(field.playerSide), red_side: sideText(field.foeSide) },
     your_recent_actions: history.slice(-3).map((h) => h.text),
     ...(battle.roles ? { your_roles: [you, ...bench].map((m) => roleText(battle.roles, m)) } : {}),

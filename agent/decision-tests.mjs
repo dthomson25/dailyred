@@ -63,6 +63,15 @@ for (const c of selected) {
     console.log(`  ${ok ? 'PASS' : 'FAIL'}  prompt: ${what}${!ok && !check.absent && !o ? ' (option missing)' : ''}`);
     if (!ok) failures++;
   }
+  // The shared state: does it say what it must? (e.g. the threat board)
+  if (c.state?.length) {
+    const text = JSON.stringify(turnState(battle));
+    for (const re of c.state) {
+      const ok = re.test(text);
+      console.log(`  ${ok ? 'PASS' : 'FAIL'}  state says ${re}`);
+      if (!ok) failures++;
+    }
+  }
   // The expected answers must actually be on offer, or the case is broken.
   // A case without an expected answer only checks the prompt (e.g. a lead
   // still waiting for a measured best answer from lead-sweep.mjs).

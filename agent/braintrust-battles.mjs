@@ -35,6 +35,7 @@ export const BATCH_NOTES = {
   'leadfix': { version: 'lead fix', change: 'PP and boosts + role-based Cost/Benefit headlines removed from lead options (they contradicted the computed lead cost)' },
   'nextfoe': { version: 'next foe', change: "lead fix + lead options say which Pokémon RED's AI sends in next against that lead (port of its switch-in choice, 84% right) and whether the team has an answer to it" },
   'setup': { version: 'setup plans', change: "next foe + setup moves (Swords Dance, Calm Mind, Toxic) compared with attacking right away, both simulated with RED's AI (Rest, healing)" },
+  'board': { version: 'threat board', change: "setup plans + a threat board in the state (each of RED's remaining Pokémon: your best answer and win chance, setup plans included) and sleep turns left" },
   'baselines': { version: 'baselines', change: 'no-model policies on the v8 setup: greedy (strongest attack) and a 2-turn lookahead search in code' },
 };
 

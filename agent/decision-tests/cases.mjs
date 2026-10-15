@@ -5,6 +5,7 @@
 //   party()    for 'lead' cases instead: your six Pokémon (teams.json holds
 //              real Daily Red teams, exactly as the game built them)
 //   type       'action' (a turn), 'send_in' (after a faint) or 'lead'
+//   state      checks on the shared state the model sees: [/regex/, ...]
 //   prompt     checks on the option text the model will see (no model needed):
 //              { option: key, contains: /regex/ } or { option: key, absent: true }
 //   expect     the right decision: { pick: [keys] } (one of these) or { avoid: [keys] };
@@ -333,6 +334,8 @@ export default [
       bench: [mon('Milotic', { moves: ['Water Gun', 'Twister'] })],
     }),
     prompt: [{ option: 'move_1', contains: /^Plan: Swords Dance first, then Slash: Scizor wins this one-on-one about \d+% of the time/ }],
+    // The threat board agrees with the option: Scizor answers Snorlax with Swords Dance first.
+    state: [/Snorlax \(HP 100%, in battle now\): best answer Scizor \(wins about \d+%, with Swords Dance first\)/],
     expect: { pick: ['move_1'] },
   },
 ];
