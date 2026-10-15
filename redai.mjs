@@ -8,6 +8,8 @@
 // predictRedMove(red, you, field) -> [{ id, name, p }] sorted by probability,
 // estimated by running the AI many times with its random rolls.
 import { MOVE_DATA, TYPES, effectiveness, abilityName, typeName, isPhysicalType } from './data.mjs';
+
+const TYPE_NAMES = TYPES.byId;
 import { estimateDamage, effectiveSpeed } from './damage.mjs';
 
 // Effects whose damage the AI leaves out when looking for its strongest move
@@ -135,8 +137,9 @@ export function predictRedMove(red, you, field = {}, samples = 300) {
 }
 
 // --- One-on-one, played out many times ---------------------------------------------------------
-// Your Pokémon uses the first of `ourMoveIds` it still has PP for (then the
-// next, and so on); RED's AI only picks moves it has PP for; RED picks with its AI each turn
+// Your Pokémon first uses the `setup` moves in order (stat boosts, Toxic),
+// then the first of `ourMoveIds` it still has PP for (then the next, and so
+// on); RED's AI only picks moves it has PP for; RED picks with its AI each turn
 // (re-scored as HP changes). Damage rolls, accuracy, speed and priority,
 // sleep (2-5 turns), paralysis (25% full paralysis, speed quartered), burn,
 // poison, freeze, Leech Seed, Rest, Morning Sun, Giga Drain healing, recoil
@@ -155,7 +158,10 @@ const BOOSTS = {
   CALM_MIND: { 4: 1, 5: 1 }, BULK_UP: { 1: 1, 2: 1 }, DRAGON_DANCE: { 1: 1 }, COSMIC_POWER: { 2: 1, 5: 1 },
 };
 const stageMult = (st) => { const n = st - 6; return n >= 0 ? (2 + n) / 2 : 2 / (2 - n); };
-export function simulateOneOnOne(mon, foe, field = {}, { ourMoveIds = [], ourMoveId, startHp = mon.hp, runs = 200, maxTurns = 15 } = {}) {
+// The same for your own setup moves (Swords Dance is ATTACK_UP_2, etc.); 3 = Speed.
+const OUR_BOOSTS = { ...BOOSTS, SPEED_UP: { 3: 1 }, SPEED_UP_2: { 3: 2 }, DRAGON_DANCE: { 1: 1, 3: 1 } };
+const TOX = 0x80;
+export function simulateOneOnOne(mon, foe, field = {}, { ourMoveIds = [], ourMoveId, setup = [], startHp = mon.hp, runs = 200, maxTurns = 15 } = {}) {
   if (ourMoveId && !ourMoveIds.length) ourMoveIds = [ourMoveId];
   field = { weather: {}, playerSide: {}, foeSide: {}, ...field };
   let s = 7; // its own fixed-seed generator: the same position always gives the same numbers
@@ -186,6 +192,9 @@ export function simulateOneOnOne(mon, foe, field = {}, { ourMoveIds = [], ourMov
     redStages = [...start];
     // Damage scales with the stage change since the estimates were made.
     const boost = (stat) => stageMult(redStages[stat]) / stageMult(start[stat]);
+    const myStart = mon.stages ?? [6, 6, 6, 6, 6, 6, 6, 6], myStages = [...myStart];
+    const myBoost = (stat) => stageMult(myStages[stat]) / stageMult(myStart[stat]);
+    let setupLeft = [...setup], toxicTurns = 0;
     for (turn = 1; turn <= maxTurns && !outcome; turn++) {
       const redMoveId = theirSleep || theirRecharge ? null : pick(predict(them, mine, myStatus, seeded, redPp));
       if (redMoveId) { const i = foe.moves.indexOf(redMoveId); if (i >= 0) redPp[i]--; }
@@ -193,20 +202,30 @@ export function simulateOneOnOne(mon, foe, field = {}, { ourMoveIds = [], ourMov
       const cur = ours.find((o) => o.slot < 0 || myPp[o.slot] > 0) ?? null;
       const ourMove = cur?.move ?? null, ourEst = cur?.est ?? null;
       const redMove = redMoveId ? MOVE_DATA.get(redMoveId) : null;
-      const mySpd = myStatus & PAR ? spdMon / 4 : spdMon, theirSpd = theirStatus & PAR ? spdFoe / 4 : spdFoe;
-      const myPri = ourMove?.priority ?? 0, theirPri = redMove?.priority ?? 0;
+      const mySpd = (myStatus & PAR ? spdMon / 4 : spdMon) * myBoost(3), theirSpd = theirStatus & PAR ? spdFoe / 4 : spdFoe;
+      const setupMove = setupLeft.length ? MOVE_DATA.get(setupLeft[0]) : null;
+      const myPri = (setupMove ?? ourMove)?.priority ?? 0, theirPri = redMove?.priority ?? 0;
       const weFirst = myPri !== theirPri ? myPri > theirPri : mySpd !== theirSpd ? mySpd > theirSpd : r() < 0.5;
       const us = () => {
         if (myRecharge) { myRecharge = false; return; }
         if (mySleep) { mySleep--; if (mySleep) return; myStatus &= ~SLP; }
         if (myStatus & FRZ) { if (r() < 0.2) myStatus &= ~FRZ; else return; }
         if (myStatus & PAR && r() < 0.25) return;
+        if (setupMove) {
+          setupLeft.shift();
+          const b = OUR_BOOSTS[setupMove.effect];
+          if (b) for (const [st, n] of Object.entries(b)) myStages[st] = Math.min(12, myStages[st] + n);
+          if (setupMove.effect === 'TOXIC' && !theirStatus && !foe.types.some((t) => ['POISON', 'STEEL'].includes(TYPE_NAMES.get(t)))
+            && !(setupMove.accuracy && r() * 100 >= setupMove.accuracy)) { theirStatus = TOX; toxicTurns = 0; }
+          return;
+        }
         if (!ourMove) return;
         if (isTwoTurn(ourMove, field.weather) && !charging) { charging = true; return; }
         charging = false;
         if (cur.slot >= 0) myPp[cur.slot]--;
         if (ourMove.accuracy && r() * 100 >= ourMove.accuracy) return;
-        let d = roll(ourEst) / boost(ourMove.power && isPhysicalType(ourMove.type) ? 2 : 5);
+        const phys = ourMove.power && isPhysicalType(ourMove.type);
+        let d = (roll(ourEst) * myBoost(phys ? 1 : 4)) / boost(phys ? 2 : 5);
         if (myStatus & BRN && ourMove.power && isPhysicalType(ourMove.type)) d /= 2;
         d = Math.min(d, Math.max(0, them));
         them -= d;
@@ -227,7 +246,8 @@ export function simulateOneOnOne(mon, foe, field = {}, { ourMoveIds = [], ourMov
         if (BOOSTS[e]) { for (const [st, n] of Object.entries(BOOSTS[e])) redStages[st] = Math.min(12, redStages[st] + n); return; }
         if (!redMove.power) return;
         if (charging && ourMove?.effect === 'SEMI_INVULNERABLE' && e !== 'EARTHQUAKE') return; // Fly/Dig/Dive dodge it
-        const d = Math.min(roll(theirEst.get(redMoveId)) * boost(isPhysicalType(redMove.type) ? 1 : 4), Math.max(0, mine));
+        const theirPhys = isPhysicalType(redMove.type);
+        const d = Math.min((roll(theirEst.get(redMoveId)) * boost(theirPhys ? 1 : 4)) / myBoost(theirPhys ? 2 : 5), Math.max(0, mine));
         mine -= d;
         if (e === 'ABSORB') them = Math.min(foe.maxHp, them + d / 2);
         if (RECOIL_SHARE[e]) them -= d * RECOIL_SHARE[e];
@@ -245,8 +265,9 @@ export function simulateOneOnOne(mon, foe, field = {}, { ourMoveIds = [], ourMov
         if (mine <= 0) { outcome = 'lose'; break; }
       }
       if (outcome) break;
-      // End of turn: poison and burn, then Leech Seed.
+      // End of turn: poison and burn, then Leech Seed; RED's bad poison grows each turn.
       if (myStatus & (PSN | BRN)) mine -= mon.maxHp / 8;
+      if (theirStatus & TOX) { toxicTurns++; them -= (foe.maxHp * Math.min(15, toxicTurns)) / 16; if (them <= 0) { outcome = 'win'; break; } }
       if (seeded) { const d = Math.min(mine, mon.maxHp / 8); mine -= d; them = Math.min(foe.maxHp, them + d); }
       if (mine <= 0) outcome = 'lose';
     }

@@ -48,7 +48,7 @@ export default [
       foe: red('Espeon', { hp: '94%' }),
       bench: [mon('Wigglytuff', { moves: ['Brick Break', 'Body Slam'] })],
     }),
-    prompt: [{ option: 'move_2', contains: /Toxic first, then Rock Smash: knocks Espeon out in about \d+ turns?, against about \d+ turns/ }],
+    prompt: [{ option: 'move_2', contains: /^Plan: Toxic first, then Rock Smash: Tyranitar wins this one-on-one about \d+% of the time[^.]*against \d+% attacking right away/ }],
     expect: { pick: ['move_2'] },
   },
   {
@@ -322,5 +322,17 @@ export default [
     prompt: ['Quagsire', 'Chimecho', 'Pinsir', 'Jolteon', 'Tyranitar', 'Wigglytuff'].map((n) => ({ option: `lead_${n}`, contains: /Lead exchange: / })),
     // Measured with Jev playing the rest: the top five are within noise (4.3-5.3); Pinsir 1.67 (3 battles).
     expect: { avoid: ['lead_Pinsir'] },
+  },
+  {
+    name: 'sets up to break through a Pokémon that heals with Rest',
+    why: "Snorlax uses Rest whenever Slash wears it down, so plain Slash rarely finishes it (about 13% in the simulation with RED's AI); after Swords Dance, Slash knocks it out before Rest catches up (about 100%). Live, OpenAI used Slash 19 turns in a row here.",
+    type: 'action',
+    battle: () => makeBattle({
+      you: mon('Scizor', { moves: ['Swords Dance', 'Slash', 'False Swipe', 'Cut'], pp: [30, 19, 40, 30] }),
+      foe: red('Snorlax'),
+      bench: [mon('Milotic', { moves: ['Water Gun', 'Twister'] })],
+    }),
+    prompt: [{ option: 'move_1', contains: /^Plan: Swords Dance first, then Slash: Scizor wins this one-on-one about \d+% of the time/ }],
+    expect: { pick: ['move_1'] },
   },
 ];

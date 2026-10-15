@@ -159,7 +159,7 @@ function applyFilter(options) {
 let layout = 'plain';
 export function setLayout(name) { layout = name; }
 // Sentences that state a consequence; in the consequence layout they move to the front.
-const CONSEQUENCE = /^(Lead cost|Lead exchange|Next|Danger|Warning|Risk|Risky|Benefit|No benefit|Little benefit|Sacrifice|Stalling|Faints before attacking|Note|Recharge cost|Overkill|Trade|Exchange):/;
+const CONSEQUENCE = /^(Plan|Lead cost|Lead exchange|Next|Danger|Warning|Risk|Risky|Benefit|No benefit|Little benefit|Sacrifice|Stalling|Faints before attacking|Note|Recharge cost|Overkill|Trade|Exchange):/;
 // A knockout risk is called certain ("Wasted", "Faints before attacking",
 // removed by the filter) from 70%; from 30% it's labeled "Risky" and kept.
 const LIKELY = 0.7;
@@ -186,15 +186,31 @@ function steadyAttacks(mon, foe, field) {
 }
 // The one-on-one from here, played out 200 times in code (redai.mjs): RED
 // picks its moves with its own AI, including sleep, Leech Seed and healing.
-function exchange(mon, foe, field, startHp = mon.hp) {
-  const ours = steadyAttacks(mon, foe, field);
+function exchange(mon, foe, field, startHp = mon.hp, setup = []) {
+  // With setup moves, rank the attacks as they will be after the boosts.
+  const boostOf = setup.map((id) => SELF_BOOSTS[MOVE_DATA.get(id).effect]).filter(Boolean).reduce((a, b) => {
+    const out = { ...a };
+    for (const [k, v] of Object.entries(b)) out[k] = (out[k] ?? 0) + v;
+    return out;
+  }, {});
+  const ours = steadyAttacks(Object.keys(boostOf).length ? withStages(mon, boostOf) : mon, foe, field);
   const hasThreat = foe.moves.some((id) => id && MOVE_DATA.get(id));
   if (!ours.length && !hasThreat) return null;
-  const x = simulateOneOnOne(mon, foe, field, { ourMoveIds: ours.map((o) => o.id), startHp: Math.max(1, startHp) });
+  const x = simulateOneOnOne(mon, foe, field, { ourMoveIds: ours.map((o) => o.id), setup, startHp: Math.max(1, startHp) });
   const move = ours.length ? MOVE_DATA.get(ours[0].id) : null;
   const slot = move ? mon.moves.indexOf(ours[0].id) : -1;
   return { ...x, moveName: move?.name, recharge: move?.effect === 'RECHARGE', pp: slot >= 0 ? mon.pp?.[slot] : null };
 }
+// A setup plan against just attacking, both played out with RED's AI:
+// "Toxic first, then Slash: wins about 70% of the time (about 6 turns), against 20% attacking right away."
+function planText(you, foe, field, move) {
+  const plan = exchange(you, foe, field, you.hp, [move.id ?? MOVES.byName.get(move.name.toUpperCase().replace(/ /g, '_'))]);
+  const plain = exchange(you, foe, field, you.hp);
+  if (!plan || !plain) return '';
+  const turns = (x) => (x.winTurns ? ` (about ${Math.max(1, Math.round(x.winTurns))} turns)` : '');
+  return `Plan: ${move.name} first, then ${plan.moveName ?? 'attacking'}: ${you.speciesName} wins this one-on-one about ${pctOf(plan.pWin)}% of the time${turns(plan)}, against ${pctOf(plain.pWin)}% attacking right away${plain.moveName ? ` with ${plain.moveName}` : ''}${turns(plain)}.`;
+}
+
 // "with Hyper Beam" plus what a recharge move costs after the knockout.
 const usingText = (x, foe) => (x.moveName ? ` using ${x.moveName}${x.recharge ? `, then losing a turn to recharge while RED's next Pokémon gets a free attack` : ''}` : '');
 function exchangeText(mon, foe, field, startHp) {
@@ -421,7 +437,7 @@ function buildAllTurnOptions(battle, excluded = new Set(), history = []) {
       const [theirs] = threats(foe, you, field);
       const survive = theirs?.avg ? Math.ceil(you.hp / theirs.avg) - 1 : Infinity;
       const words = (n) => (Number.isFinite(n) ? `about ${n} turn${n === 1 ? '' : 's'}` : 'never');
-      parts.push(`Toxic first${best ? `, then ${best.name}` : ''}: knocks ${foe.speciesName} out in ${words(withToxic)}, against ${words(without)} ${best ? `with ${best.name} alone` : 'without it'}${lefties ? ` (counting its Leftovers)` : ''}. ${you.speciesName} survives ${Number.isFinite(survive) ? `about ${survive} of its attacks` : 'its attacks indefinitely'}.`);
+      parts.push(planText(you, foe, field, { ...move, id }) || `Toxic first${best ? `, then ${best.name}` : ''}: knocks ${foe.speciesName} out in ${words(withToxic)}, against ${words(without)} ${best ? `with ${best.name} alone` : 'without it'}${lefties ? ` (counting its Leftovers)` : ''}. ${you.speciesName} survives ${Number.isFinite(survive) ? `about ${survive} of its attacks` : 'its attacks indefinitely'}.`);
       const heals = foe.moves.filter((m) => m && HEALING_EFFECTS.has(MOVE_DATA.get(m).effect)).map((m) => MOVE_DATA.get(m).name);
       if (heals.includes('Rest')) parts.push(`${foe.speciesName} knows Rest, which cures poison.`);
       else if (heals.length) parts.push(`${foe.speciesName} can heal with ${heals.join(' and ')}, which undoes attack damage but not the growing poison.`);
@@ -438,7 +454,7 @@ function buildAllTurnOptions(battle, excluded = new Set(), history = []) {
         const [theirs] = threats(foe, boosted, field);
         const survive = theirs?.avg ? Math.ceil(you.hp / theirs.avg) - 1 : Infinity;
         const words = (n) => (Number.isFinite(n) ? `about ${n} turn${n === 1 ? '' : 's'}` : 'never');
-        parts.push(`${move.name} first, then ${after.name}: knocks ${foe.speciesName} out in ${words(first)}, against ${words(alone)} with ${before.name} alone. ${you.speciesName} survives ${Number.isFinite(survive) ? `about ${survive} of its attacks` : 'its attacks indefinitely'} after the boost.`);
+        parts.push(planText(you, foe, field, { ...move, id }) || `${move.name} first, then ${after.name}: knocks ${foe.speciesName} out in ${words(first)}, against ${words(alone)} with ${before.name} alone. ${you.speciesName} survives ${Number.isFinite(survive) ? `about ${survive} of its attacks` : 'its attacks indefinitely'} after the boost.`);
       }
     }
     // Speed changes: say who would move first afterwards.
