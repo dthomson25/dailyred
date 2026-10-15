@@ -46,11 +46,16 @@ export async function launchBrowser() {
 // Boots the ROM in a bare page (no website UI) with an optional seed. By
 // default the game deals a new team after each battle; daily: true plays the
 // website's daily game instead (one battle, starting from wins / battles).
-// The emulator instance is exposed as window.emu.
-export async function bootGame(page, baseUrl, { seed, daily = false, wins = 0, battles = 0 } = {}) {
+// The emulator instance is exposed as window.emu. speed > 1 runs the game
+// faster: see ensureSpeed, which must be called once the game is running.
+let pressHoldMs = 120;
+export async function bootGame(page, baseUrl, { seed, daily = false, wins = 0, battles = 0, speed = 1 } = {}) {
+  // Hold buttons for about the same number of frames at any speed (a long
+  // hold at high speed would auto-repeat in menus).
+  pressHoldMs = Math.max(40, Math.round(120 / speed));
   await page.goto(`${baseUrl}/__test__`);
   await page.setContent('<canvas id="screen" width="480" height="320" style="display:block"></canvas>');
-  await page.evaluate(async ({ seed, daily, wins, battles }) => {
+  await page.evaluate(async ({ seed, daily, wins, battles, speed }) => {
     const { Nostalgist } = await import('/vendor/nostalgist.js');
     const { injectConfig } = await import('/rom-config.js');
     const { loadGameFiles } = await import('/game-files.js');
@@ -62,15 +67,48 @@ export async function bootGame(page, baseUrl, { seed, daily = false, wins = 0, b
       rom: { fileName: 'dailyred.gba', fileContent: new Blob([rom]) },
       resolveCoreJs: () => files.coreJs,
       resolveCoreWasm: () => files.coreWasm,
-      retroarchConfig: { savestate_file_compression: false, savestate_thumbnail_enable: false },
+      retroarchConfig: { savestate_file_compression: false, savestate_thumbnail_enable: false, fastforward_ratio: speed },
     });
-  }, { seed, daily, wins, battles });
+    if (speed > 1) {
+      // Emscripten paces the main loop with requestAnimationFrame, one emulated
+      // frame per display refresh, so fast-forward can never pass 60 fps.
+      // Run it from a MessageChannel instead; RetroArch's fastforward_ratio
+      // then caps the speed.
+      const loop = window.emu.getEmscripten().Browser.mainLoop;
+      const channel = new MessageChannel();
+      channel.port1.onmessage = () => loop.runner();
+      loop.timingMode = 0;
+      loop.scheduler = () => channel.port2.postMessage(0);
+    }
+  }, { seed, daily, wins, battles, speed });
+}
+
+// Game frames per real second, from gMain.vblankCounter2 (about 60 at normal speed).
+export async function measureFps(page, ms = 1500) {
+  const frame = async () => (await readMemory(page)).read(symbol('gMain') + 0x24, 4).readUInt32LE(0);
+  const f0 = await frame(), t0 = Date.now();
+  await sleep(ms);
+  const f1 = await frame(), t1 = Date.now();
+  return (f1 - f0) / ((t1 - t0) / 1000);
+}
+
+// Turns on fast-forward once the game is running (a FAST_FORWARD command sent
+// during boot is lost) and checks the frame rate actually went up. Returns
+// the measured frames per second.
+export async function ensureSpeed(page, speed) {
+  let fps = await measureFps(page);
+  for (let i = 0; speed > 1 && fps < 60 * speed * 0.6 && i < 4; i++) {
+    await page.evaluate(() => window.emu.sendCommand('FAST_FORWARD'));
+    await sleep(300);
+    fps = await measureFps(page);
+  }
+  return fps;
 }
 
 export const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 // Presses a GBA button: a, b, start, select, up, down, left, right, l, r.
-export async function press(page, button, holdMs = 120) {
+export async function press(page, button, holdMs = pressHoldMs) {
   await page.evaluate(({ button, holdMs }) => window.emu.press(button, 1, holdMs), { button, holdMs });
   await sleep(80);
 }
