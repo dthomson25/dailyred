@@ -31,7 +31,7 @@ import {
   readBattle, readOwnParty, readPhase, waitForInput, useMove, switchTo, sendIn,
 } from './battle.mjs';
 import {
-  JevBrain, OpenAIBrain, GreedyBrain, SearchBrain, buildRoleItems, roleText, matchup, setOrderCount, setLayout, setFilterFlagged, setDecisionMode, setStateStyle, buildTurnOptions, buildSendInOptions, buildLeadOptions, redTeamFromSource, statusText,
+  JevBrain, OpenAIBrain, GreedyBrain, SearchBrain, buildRoleItems, roleText, matchup, setOrderCount, setLayout, setFilterFlagged, setDecisionMode, setStateStyle, setOptionFormat, buildTurnOptions, buildSendInOptions, buildLeadOptions, redTeamFromSource, statusText,
 } from './brain.mjs';
 import { MOVE_DATA } from './data.mjs';
 import { startTrace, describeDecision } from './trace.mjs';
@@ -58,6 +58,7 @@ const { values: args } = parseArgs({
     'filter-flagged': { type: 'boolean', default: true },        // drop flagged options when a safe one exists
     'no-filter': { type: 'boolean', default: false },            // keep flagged options (the pre-filter behavior)
     state: { type: 'string', default: 'lean' },                  // lean | full (full adds roles, history, other Pokémon)
+    options: { type: 'string', default: 'text' },                // text | json (Jev: options as prose or as JSON fields)
     trace: { type: 'boolean', default: false },                  // stream the battle to Braintrust Logs
   },
 });
@@ -78,6 +79,7 @@ setLayout(args.layout);
 setDecisionMode(args.mode);
 setFilterFlagged(args['filter-flagged'] && !args['no-filter']);
 setStateStyle(args.state);
+setOptionFormat(args.options);
 const brain = args.policy === 'jev' ? new JevBrain({ model: args.model })
   : args.policy === 'openai' ? new OpenAIBrain({ model: args.model })
   : args.policy === 'search' ? new SearchBrain()
