@@ -191,14 +191,16 @@ function steadyAttacks(mon, foe, field) {
 }
 // The one-on-one from here, played out 200 times in code (redai.mjs): RED
 // picks its moves with its own AI, including sleep, Leech Seed and healing.
-function exchange(mon, foe, field, startHp = mon.hp, setup = []) {
+export function exchange(mon, foe, field, startHp = mon.hp, setup = [], primary = null) {
   // With setup moves, rank the attacks as they will be after the boosts.
   const boostOf = setup.map((id) => SELF_BOOSTS[MOVE_DATA.get(id).effect]).filter(Boolean).reduce((a, b) => {
     const out = { ...a };
     for (const [k, v] of Object.entries(b)) out[k] = (out[k] ?? 0) + v;
     return out;
   }, {});
-  const ours = steadyAttacks(Object.keys(boostOf).length ? withStages(mon, boostOf) : mon, foe, field);
+  let ours = steadyAttacks(Object.keys(boostOf).length ? withStages(mon, boostOf) : mon, foe, field);
+  // `primary`: use this attack first (until its PP runs out), then the rest.
+  if (primary) ours = [{ id: primary }, ...ours.filter((o) => o.id !== primary)];
   const hasThreat = foe.moves.some((id) => id && MOVE_DATA.get(id));
   if (!ours.length && !hasThreat) return null;
   const x = simulateOneOnOne(mon, foe, field, { ourMoveIds: ours.map((o) => o.id), setup, startHp: Math.max(1, startHp) });
@@ -750,6 +752,7 @@ export function redTeamFromSource() {
 // A lead that wins easily keeps its later value; one that wins hurt spends it.
 function laterValue(mon, party, reds, field, hpAfter = mon.hp) {
   const only = [], best = [], also = [], lost = [];
+  let dropSum = 0;
   for (const r of reds) {
     const mine = exchange(mon, r, field)?.pWin ?? 0;
     if (mine < 0.5) continue;
@@ -764,7 +767,7 @@ function laterValue(mon, party, reds, field, hpAfter = mon.hp) {
     if (hpAfter < mon.hp && (!next || mine > next.p)) {
       const hurt = exchange(mon, r, field, hpAfter)?.pWin ?? 0;
       const fallback = Math.max(hurt, next?.p ?? 0);
-      if (mine - fallback >= 0.15) lost.push(`against ${r.speciesName} your best chance drops from ${pctOf(mine)}% to ${pctOf(fallback)}%`);
+      if (mine - fallback >= 0.15) { lost.push(`against ${r.speciesName} your best chance drops from ${pctOf(mine)}% to ${pctOf(fallback)}%`); dropSum += mine - fallback; }
     }
   }
   const parts = [];
@@ -774,12 +777,23 @@ function laterValue(mon, party, reds, field, hpAfter = mon.hp) {
   return {
     text: parts.length ? `Later in the battle (win chance one-on-one at full HP): ${parts.join('; ')}.`
       : `Later in the battle: it does not win a one-on-one against any of RED's other Pokémon.`,
+    drop: dropSum,
     cost: !lost.length ? (only.length || best.length
         ? `Lead cost: none: it should keep enough HP to still be your best answer to ${[...only, ...best].map((x) => x.split(' (')[0]).join(', ')}.`
         : `Lead cost: none: ${mon.speciesName} is not your best answer to any of RED's other Pokémon, so losing it here costs nothing later.`)
       : hpAfter <= 1 ? `Lead cost: ${mon.speciesName} most likely faints in the lead, so ${lost.join('; ')}.`
       : `Lead cost: with the HP it would have left after the lead, ${lost.join('; ')}.`,
   };
+}
+
+// The lead as a number (for the no-model player): win chance against RED's
+// lead minus the later win chance leading would spend.
+export function leadScore(mon, party, redTeam) {
+  const field = { weather: {}, playerSide: {}, foeSide: {} };
+  const now = exchange(mon, redTeam[0], field);
+  if (!now) return 0;
+  const hpAfter = now.pWin >= 0.5 ? Math.max(1, Math.round(now.winLeft * mon.maxHp)) : 0;
+  return now.pWin - laterValue(mon, party, redTeam.slice(1), field, hpAfter).drop;
 }
 
 export function buildLeadOptions(party, redTeam, roles = null) {
@@ -1306,7 +1320,7 @@ export function turnState(battle) {
 // a choice would spend the only answer to a later fight.
 // A Pokémon's best plan against `r`: attacking right away, or one setup move
 // (a stat boost or Toxic) first, whichever wins more often.
-function bestPlan(m, r, field) {
+export function bestPlan(m, r, field) {
   let best = { p: exchange(m, r, field)?.pWin ?? 0, setup: null };
   m.moves.forEach((id, i) => {
     if (!id || (m.pp && m.pp[i] <= 0)) return;

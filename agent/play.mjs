@@ -9,6 +9,8 @@
 //   node play.mjs --policy openai # OpenAI's Decisions API instead of Jev (OPENAI_API_KEY)
 //   node play.mjs --policy greedy # no model: always the strongest attack (baseline)
 //   node play.mjs --policy search # no model: a 2-turn lookahead in code (stronger baseline)
+//   node play.mjs --policy sim    # no model: every option scored by the RED-AI simulations
+//   node play.mjs --policy route  # Jev, with OpenAI's Decisions API on Jev's close calls
 //   node play.mjs --speed 1       # normal game speed (default 4x fast-forward)
 //   node play.mjs --lead Dugtrio  # force the lead instead of asking the model (lead-sweep.mjs)
 //   node play.mjs --show-jev      # print every Jev request and response in full
@@ -19,6 +21,8 @@ import { mkdirSync, appendFileSync } from 'node:fs';
 import { parseArgs } from 'node:util';
 import { chromium } from 'playwright-core';
 import { loadDailyRed } from './dailyred.mjs';
+import { SimBrain } from './simbrain.mjs';
+import { RouterBrain } from './router.mjs';
 const {
   findChrome, startServer, bootGame, ensureSpeed, waitFor, walkTo, face, press, sleep, screenshot, readMemory,
 } = await loadDailyRed('tests/lib.mjs');
@@ -60,9 +64,9 @@ const { values: args } = parseArgs({
 
 const date = args.date ?? today();
 const seed = args.seed ? Number(args.seed) : dailySeed(date);
-const REQUIRED_KEY = { jev: 'TYPESAFE_API_KEY', openai: 'OPENAI_API_KEY' };
-if (!['jev', 'openai', 'greedy', 'search'].includes(args.policy)) {
-  console.error(`Unknown --policy ${args.policy}: use jev, openai, greedy or search.`);
+const REQUIRED_KEY = { jev: 'TYPESAFE_API_KEY', openai: 'OPENAI_API_KEY', route: 'TYPESAFE_API_KEY' };
+if (!['jev', 'openai', 'greedy', 'search', 'sim', 'route'].includes(args.policy)) {
+  console.error(`Unknown --policy ${args.policy}: use jev, openai, greedy, search, sim or route.`);
   process.exit(1);
 }
 if (REQUIRED_KEY[args.policy] && !process.env[REQUIRED_KEY[args.policy]]) {
@@ -77,6 +81,8 @@ setStateStyle(args.state);
 const brain = args.policy === 'jev' ? new JevBrain({ model: args.model })
   : args.policy === 'openai' ? new OpenAIBrain({ model: args.model })
   : args.policy === 'search' ? new SearchBrain()
+  : args.policy === 'sim' ? new SimBrain()
+  : args.policy === 'route' ? new RouterBrain({ model: args.model })
   : new GreedyBrain();
 
 const OUT = new URL('./output/', import.meta.url).pathname;
@@ -334,6 +340,7 @@ try {
   if (brain.usage) {
     const u = brain.usage;
     console.log(`${args.policy === 'openai' ? 'OpenAI' : 'Jev'} usage: ${u.requests} requests, ${u.input_tokens} input / ${u.output_tokens} output tokens${u.refusals ? `, ${u.refusals} refusals` : ''}`);
+    if (u.routed) console.log(`Routing: ${u.routed.escalated} of ${u.routed.decisions} decisions went to OpenAI (Jev's top pick under ${process.env.ROUTE_BELOW ?? 0.4}); OpenAI ${u.openai.requests} requests, ${u.openai.input_tokens} input tokens`);
     if (u.latencies.length) {
       const sorted = [...u.latencies].sort((a, b) => a - b);
       const total = sorted.reduce((a, b) => a + b, 0);
