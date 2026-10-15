@@ -2,7 +2,7 @@
 // move, species, item, ability and type tables, the type chart and RED's
 // party. Rerun after changing the ROM hack (moves, species or RED's team).
 //
-//   DAILYRED_DIR=../dailyred node scripts/export-game-data.mjs
+//   node scripts/export-game-data.mjs     (from agent/, with pokefirered/ fetched)
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { GAME_DIR, requireDailyRed } from '../dailyred.mjs';
 import { parseGameSource } from '../data.mjs';

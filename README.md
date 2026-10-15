@@ -12,6 +12,11 @@ small set of source changes, built into a GBA ROM and played in the browser
 through the mGBA emulator compiled to WebAssembly. Nothing about battles is
 reimplemented in JavaScript.
 
+This fork adds [`agent/`](agent/README.md): an agent that plays the battle
+against RED by itself, choosing the lead, moves and switches with
+[Jev](https://docs.typesafe.ai/) (TypeSafe) or OpenAI's Decisions API, with a
+port of RED's FireRed AI to predict his moves and replacements.
+
 - [Quick start (macOS)](#quick-start-macos)
 - [How it works](#how-it-works)
 - [Team generation](#team-generation)

@@ -5,7 +5,7 @@ Plays the day's Daily Red battle against RED by itself, using
 lead, every move and every switch.
 
 ```sh
-npm install
+cd agent && npm install
 echo TYPESAFE_API_KEY=... > .env   # git-ignored; or export it (OPENAI_API_KEY, BRAINTRUST_API_KEY too)
 node play.mjs                      # today's team, in a Chrome window you can watch
 node play.mjs --headless           # no window (e.g. for batch runs)
@@ -19,8 +19,8 @@ node decision-tests.mjs --policy both
 
 ## What needs the Daily Red ROM hack
 
-This repo is only the agent. It plays [Daily Red](../dailyred), a FireRed ROM
-hack, and depends on it in two different ways:
+The agent lives in `agent/` of this Daily Red fork and depends on the ROM hack
+in two different ways:
 
 - **Decisions** (`brain.mjs`, `redai.mjs`, `damage.mjs`, `data.mjs`): option
   text, the port of RED's FireRed AI (move choice and switch-in), the
@@ -33,9 +33,8 @@ hack, and depends on it in two different ways:
   drives the game in the website's emulator, reads battle RAM through the built
   ROM's symbol map, uses Daily Red's test helpers (`tests/lib.mjs`,
   `tests/party.mjs`) and daily seed (`web/daily.js`), and walks to RED on the
-  hack's map. This needs a Daily Red checkout with the ROM built (its README's
-  quick start, then `cd tests && npm install` there). The agent looks for it
-  at `../dailyred`, or set `DAILYRED_DIR`. The game runs in practice mode, so
+  hack's map. This needs the ROM built (the main README's quick start, then
+  `cd tests && npm install`). Set `DAILYRED_DIR` to use another checkout. The game runs in practice mode, so
   nothing counts as your daily battle.
 
 Options: `--orders N` (ask each choice in N option orders and average; default

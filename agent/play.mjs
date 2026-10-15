@@ -1,7 +1,7 @@
 // Plays Daily Red against RED with the day's team, using Jev (TypeSafe) to
 // choose the lead, every move and every switch.
 //
-//   npm install, with a built Daily Red checkout at ../dailyred or DAILYRED_DIR (its README; then cd tests && npm install there)
+//   cd agent && npm install (and cd tests && npm install), with the ROM built (main README)
 //   echo TYPESAFE_API_KEY=... > .env   (or export it)
 //   node play.mjs                 # today's team, in a Chrome window you can watch
 //   node play.mjs --headless      # no window

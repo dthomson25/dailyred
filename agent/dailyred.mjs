@@ -5,13 +5,14 @@
 // RED's AI, simulations, decision tests, replays) runs from data/game-data.json
 // and needs no checkout.
 //
-// Set DAILYRED_DIR, or keep the checkout next to this repo as ../dailyred.
+// The agent lives in agent/ of a Daily Red fork, so by default that is the
+// repo around it; set DAILYRED_DIR to use another checkout.
 import { existsSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
-export const DAILYRED_DIR = resolve(process.env.DAILYRED_DIR ?? join(HERE, '..', 'dailyred'));
+export const DAILYRED_DIR = resolve(process.env.DAILYRED_DIR || join(HERE, '..'));
 export const GAME_DIR = join(DAILYRED_DIR, 'pokefirered');
 
 export function requireDailyRed(what) {
