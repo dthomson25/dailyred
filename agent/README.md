@@ -42,7 +42,9 @@ Options: `--orders N` (ask each choice in N option orders and average; default
 the final pick in only 3% of Jev's and 7% of OpenAI's decisions, for about 70%
 more tokens), `--roles sticky|replan`, `--model NAME` (Jev version, or the Decisions model for `--policy openai`;
 default `gpt-6-luna`), `--speed 4` (fast-forward; default 4x, `--speed 1` for normal
-speed), `--show-jev` (print each Jev request and response in full),
+speed), `--sound` (game sound, sped up to match `--speed`; muted by default),
+`--show-jev` (print each Jev request and response in brief: one line per
+question with the top answers, plus token counts), `--show-jev-full` (print them in full),
 `--date 2026-10-13` (that day's team), `--model jev-1.13` (pin a Jev
 version), `--screenshots` (one per decision), `--no-lead` (keep the party
 order).
@@ -213,7 +215,8 @@ Turn 3: Gyarados 81% healthy vs RED's Charizard 100% healthy
 
 and `output/<seed>-<policy>-<time>.jsonl` logs every decision with the
 exact Jev request (`decision.request`) and response (`decision.response`), for
-comparing runs. `--show-jev` prints them as they happen.
+comparing runs. `--show-jev` prints a one-line summary of each as it happens,
+`--show-jev-full` the full JSON.
 
 ## Known limitations
 

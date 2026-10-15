@@ -13,7 +13,9 @@
 //   node play.mjs --policy route  # Jev, with OpenAI's Decisions API on Jev's close calls
 //   node play.mjs --speed 1       # normal game speed (default 4x fast-forward)
 //   node play.mjs --lead Dugtrio  # force the lead instead of asking the model (lead-sweep.mjs)
-//   node play.mjs --show-jev      # print every Jev request and response in full
+//   node play.mjs --sound         # with game sound (sped up to match --speed)
+//   node play.mjs --show-jev      # print each Jev request and response, abbreviated
+//   node play.mjs --show-jev-full # print every Jev request and response in full
 //
 // The game runs in practice mode (nothing is recorded as your daily battle).
 // Each decision is printed and logged to agent/output/.
@@ -49,6 +51,8 @@ const { values: args } = parseArgs({
     screenshots: { type: 'boolean', default: false },
     speed: { type: 'string', default: '4' },
     'show-jev': { type: 'boolean', default: false },
+    'show-jev-full': { type: 'boolean', default: false },
+    sound: { type: 'boolean', default: false },
     'no-lead': { type: 'boolean', default: false },
     lead: { type: 'string' },                                  // force this lead (by species name), for measuring leads
     roles: { type: 'string', default: 'sticky' },
@@ -94,11 +98,26 @@ const logFile = `${OUT}/${runId}.jsonl`;
 const log = (entry) => appendFileSync(logFile, JSON.stringify(entry) + '\n');
 
 const hp = (m) => `${Math.round((100 * m.hp) / m.maxHp)}%`;
+
+// A short name for an option ("send in Scizor", "Surf"), or null when its
+// text doesn't name one. Option text often opens with the consequence
+// ("Exchange: …", "Benefit: …") rather than the action.
+function actionName(options, key) {
+  if (key === 'no_good_option') return 'no good option';
+  const named = key.match(/^(lead|send|switch|mon)_(.+)$/);
+  if (named) return `${{ lead: 'lead', send: 'send in', switch: 'switch to', mon: '' }[named[1]]} ${named[2].replace(/_/g, ' ')}`.trim();
+  const move = options.find((o) => o.key === key)?.text.match(/Use ([^(.]+?) \(/);
+  return move ? move[1] : null;
+}
+
 function printDecision(title, options, decision) {
   console.log(`\n${title}`);
   for (const [key, p] of Object.entries(decision.probabilities).slice(0, 4)) {
     const o = options.find((x) => x.key === key);
-    console.log(`  ${key === decision.choice ? '→' : ' '} ${(p * 100).toFixed(0).padStart(3)}%  ${o.text.split('. ')[0].replace(/\.$/, '')}`);
+    const first = o.text.split('. ')[0].replace(/\.$/, '');
+    const name = actionName(options, key);
+    const line = name && !first.startsWith(`Use ${name}`) ? `${name} — ${first}` : first;
+    console.log(`  ${key === decision.choice ? '→' : ' '} ${(p * 100).toFixed(0).padStart(3)}%  ${line}`);
   }
   if (decision.reason) console.log(`    reason: ${decision.reason}`);
   if (decision.refused) console.log('    (the model refused twice; used the greedy pick)');
@@ -108,11 +127,43 @@ function printDecision(title, options, decision) {
     const early = decision.tooEarly !== undefined ? ` · too early to tell: ${Math.round(decision.tooEarly * 100)}%` : '';
     console.log(`    outlook ${decision.outlook.toFixed(2)} / 4 (0 losing … 4 winning)${early}`);
   }
-  if (args['show-jev'] && decision.request) {
+  if (args['show-jev'] && !args['show-jev-full'] && decision.request) printBrief(options, decision);
+  if (args['show-jev-full'] && decision.request) {
     console.log(`\n--- ${args.policy === 'openai' ? 'OpenAI request (POST /v1/decisions)' : 'Jev request (POST /v1/systemone)'} ---`);
     console.log(JSON.stringify(decision.request, null, 2));
     console.log('--- response ---');
     console.log(JSON.stringify(decision.response, null, 2));
+  }
+}
+
+// --show-jev: one line per question in the request, with the model's answer
+// (its top three options for a Choice), instead of the full JSON.
+function printBrief(options, decision) {
+  const { request, response } = decision;
+  const label = (key) => {
+    const name = actionName(options, key);
+    if (name) return name;
+    const first = options.find((o) => o.key === key)?.text.split('. ')[0] ?? key;
+    return first.length > 40 ? `${first.slice(0, 39)}…` : first;
+  };
+  const usage = response?.usage ? ` · ${response.usage.input_tokens} in / ${response.usage.output_tokens} out tokens` : '';
+  const stateChars = (typeof request.input === 'string' ? request.input : JSON.stringify(request.state ?? '')).length;
+  console.log(`    [${response?.model ?? request.model}${usage} · state ${stateChars} chars]`);
+  for (const [name, a] of Object.entries(response?.answers ?? {})) {
+    if (!a) { console.log(`    ${name}: (refused)`); continue; }
+    let answer;
+    if (a.type === 'score') {
+      answer = `${a.score.toFixed(2)} / 4 (confidence ${Math.round(a.confidence * 100)}%)`;
+    } else if (a.type === 'noul') {
+      answer = `${Math.round(a.noul * 100)}%`;
+    } else if (a.probabilities) {
+      answer = Object.entries(a.probabilities).sort((x, y) => y[1] - x[1]).slice(0, 3)
+        .map(([k, p]) => `${label(k)} ${Math.round(p * 100)}%`).join(' · ');
+    } else {
+      answer = Object.entries(a).filter(([k]) => k !== 'type')
+        .map(([k, v]) => `${k} ${typeof v === 'number' ? +v.toFixed(2) : JSON.stringify(v)}`).join(', ');
+    }
+    console.log(`    ${name}: ${answer}`);
   }
 }
 
@@ -212,7 +263,7 @@ const server = await startServer();
 const browser = await chromium.launch({
   executablePath: findChrome(),
   headless: args.headless,
-  args: ['--autoplay-policy=no-user-gesture-required', '--mute-audio'],
+  args: ['--autoplay-policy=no-user-gesture-required', ...(args.sound ? [] : ['--mute-audio'])],
 });
 const page = await browser.newPage({ viewport: { width: 520, height: 390 } });
 page.on('pageerror', (e) => console.log('[pageerror]', e.message));
@@ -228,7 +279,7 @@ const tracer = startTrace({
 const traceMeta = { policy: args.policy, team: args.seed ?? 'today' };
 try {
   console.log(`Daily Red agent: ${args.seed ? `seed ${seed}` : `${date} (seed ${seed})`}, policy ${args.policy}, speed ${args.speed}x`);
-  await bootGame(page, server.url, { seed, speed: Number(args.speed) });
+  await bootGame(page, server.url, { seed, speed: Number(args.speed), sound: args.sound });
   // Label the window (URL, title and a line above the game) so several runs
   // side by side can be told apart.
   const model = args.policy === 'greedy' ? null : brain.model ?? brain.client?.defaultModel;

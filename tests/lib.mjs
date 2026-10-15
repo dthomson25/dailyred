@@ -49,13 +49,13 @@ export async function launchBrowser() {
 // The emulator instance is exposed as window.emu. speed > 1 runs the game
 // faster: see ensureSpeed, which must be called once the game is running.
 let pressHoldMs = 120;
-export async function bootGame(page, baseUrl, { seed, daily = false, wins = 0, battles = 0, speed = 1 } = {}) {
+export async function bootGame(page, baseUrl, { seed, daily = false, wins = 0, battles = 0, speed = 1, sound = false } = {}) {
   // Hold buttons for about the same number of frames at any speed (a long
   // hold at high speed would auto-repeat in menus).
   pressHoldMs = Math.max(40, Math.round(120 / speed));
   await page.goto(`${baseUrl}/__test__`);
   await page.setContent('<canvas id="screen" width="480" height="320" style="display:block"></canvas>');
-  await page.evaluate(async ({ seed, daily, wins, battles, speed }) => {
+  await page.evaluate(async ({ seed, daily, wins, battles, speed, sound }) => {
     const { Nostalgist } = await import('/vendor/nostalgist.js');
     const { injectConfig } = await import('/rom-config.js');
     const { loadGameFiles } = await import('/game-files.js');
@@ -67,7 +67,11 @@ export async function bootGame(page, baseUrl, { seed, daily = false, wins = 0, b
       rom: { fileName: 'dailyred.gba', fileContent: new Blob([rom]) },
       resolveCoreJs: () => files.coreJs,
       resolveCoreWasm: () => files.coreWasm,
-      retroarchConfig: { savestate_file_compression: false, savestate_thumbnail_enable: false, fastforward_ratio: speed },
+      retroarchConfig: {
+        savestate_file_compression: false, savestate_thumbnail_enable: false, fastforward_ratio: speed,
+        // With sound, keep playing it while fast-forwarding, sped up to match.
+        ...(sound && { audio_fastforward_mute: false, audio_fastforward_speedup: true }),
+      },
     });
     if (speed > 1) {
       // Emscripten paces the main loop with requestAnimationFrame, one emulated
@@ -80,7 +84,7 @@ export async function bootGame(page, baseUrl, { seed, daily = false, wins = 0, b
       loop.timingMode = 0;
       loop.scheduler = () => channel.port2.postMessage(0);
     }
-  }, { seed, daily, wins, battles, speed });
+  }, { seed, daily, wins, battles, speed, sound });
 }
 
 // Game frames per real second, from gMain.vblankCounter2 (about 60 at normal speed).
