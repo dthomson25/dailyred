@@ -939,10 +939,37 @@ function orderings(options) {
 }
 
 // One Choice per order, keyed pick_a, pick_b, pick_c...
-function choiceQuestions(question, options, noneText = NO_GOOD_TEXT) {
+// Option format for Jev (--options text|json). "text": each option is one
+// prose string. "json": the same content as fields: the action, its labeled
+// consequences ("Plan", "Lead cost", "Danger", ...), the computed numbers the
+// option carries, and the remaining details. Jev's criteria accept JSON.
+let optionFormat = 'text';
+export function setOptionFormat(format) { optionFormat = format; }
+const LABELED = /^([A-Z][A-Za-z ]{1,30}): (.*)$/;
+export function optionJson(o) {
+  const sentences = o.text.split(/(?<=\.)\s+(?=[A-Z])/);
+  const out = { action: null, consequences: {}, numbers: {}, details: [] };
+  for (const sentence of sentences) {
+    const action = sentence.match(/^(Use|Switch out to|Send in|Lead with) ([^(]+?) \((.*)\)\.$/);
+    const labeled = sentence.match(LABELED);
+    if (action && !out.action) { out.action = `${action[1]} ${action[2]}`; out.action_details = action[3]; }
+    else if (labeled) out.consequences[labeled[1]] = labeled[2];
+    else if (!out.action) (out.consequences.Outcome = out.consequences.Outcome ? `${out.consequences.Outcome} ${sentence}` : sentence);
+    else out.details.push(sentence);
+  }
+  if (o.koChance != null) out.numbers.knock_out_chance_this_turn = Math.round(o.koChance * 100) / 100;
+  if (o.accuracy != null) out.numbers.accuracy_percent = o.accuracy;
+  if (o.fails != null) out.numbers.will_fail = o.fails;
+  if (o.order) out.numbers.moves_first = o.order === 'you' ? 'yes' : o.order === 'foe' ? 'no' : 'speed tie';
+  if (!Object.keys(out.numbers).length) delete out.numbers;
+  if (!Object.keys(out.consequences).length) delete out.consequences;
+  return out;
+}
+function choiceQuestions(question, options, noneText = NO_GOOD_TEXT, format = 'text') {
+  const optionCriterion = (o) => (format === 'json' ? optionJson(o) : o.text);
   return Object.fromEntries(orderings(options).map((order, i) => [`pick_${ORDER_NAMES[i]}`, {
     type: 'choice', instructions: question,
-    criteria: Object.fromEntries([...order.map((o) => [o.key, o.text]), [NO_GOOD, noneText]]),
+    criteria: Object.fromEntries([...order.map((o) => [o.key, optionCriterion(o)]), [NO_GOOD, noneText]]),
   }]));
 }
 
@@ -1015,7 +1042,7 @@ export class JevBrain {
 
   async ask(state, question, options, extra = {}) {
     if (options.length === 1) return { choice: options[0].key, probabilities: { [options[0].key]: 1 }, single: true };
-    const request = { state, questions: { ...choiceQuestions(jevInstructions(question), options), ...extra } };
+    const request = { state, questions: { ...choiceQuestions(jevInstructions(question), options, NO_GOOD_TEXT, optionFormat), ...extra } };
     const started = performance.now();
     const res = await this.client.systemOne(request);
     const latencyMs = Math.round(performance.now() - started);

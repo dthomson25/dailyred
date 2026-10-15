@@ -26,7 +26,7 @@ import { parseArgs } from 'node:util';
 import { init as initBraintrust } from 'braintrust';
 import {
   JevBrain, OpenAIBrain, ACTION_QUESTION, SEND_IN_QUESTION, buildTurnOptions, buildSendInOptions, turnState,
-  setOrderCount, setLayout, setInstructionStyle, setDecisionMode, setStateStyle, leanState, decide,
+  setOrderCount, setOptionFormat, setLayout, setInstructionStyle, setDecisionMode, setStateStyle, leanState, decide,
 } from './brain.mjs';
 
 try { process.loadEnvFile(new URL('./.env', import.meta.url)); } catch { /* use the environment */ }
@@ -46,6 +46,7 @@ const { values: args, positionals: files } = parseArgs({
     mode: { type: 'string', default: 'choice' },               // choice | score | hybrid (Score filters, Choice picks)
     state: { type: 'string', default: 'full' },                // full | lean (drop roles, history, other Pokémon)
     instructions: { type: 'string', default: 'structured' },   // structured | flat (Jev only)
+    options: { type: 'string', default: 'text' },               // text | json (Jev: options as prose or as JSON fields)
   },
 });
 if (args.from) {
@@ -56,6 +57,7 @@ setLayout(args.layout);
 setInstructionStyle(args.instructions);
 setDecisionMode(args.mode);
 setStateStyle(args.state);
+setOptionFormat(args.options);
 setOrderCount(Number(args.orders));
 const brain = args.policy === 'jev' ? new JevBrain() : args.policy === 'openai' ? new OpenAIBrain() : null;
 

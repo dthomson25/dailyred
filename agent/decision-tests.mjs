@@ -13,7 +13,7 @@
 import { parseArgs } from 'node:util';
 import {
   JevBrain, OpenAIBrain, buildTurnOptions, buildSendInOptions, buildLeadOptions, redTeamFromSource, turnState,
-  ACTION_QUESTION, SEND_IN_QUESTION, decide, setLayout, setFilterFlagged, setStateStyle, setOrderCount,
+  ACTION_QUESTION, SEND_IN_QUESTION, decide, setLayout, setFilterFlagged, setStateStyle, setOrderCount, setOptionFormat,
 } from './brain.mjs';
 import cases from './decision-tests/cases.mjs';
 
@@ -32,11 +32,13 @@ const { values: args } = parseArgs({
     'no-filter': { type: 'boolean', default: false },
     state: { type: 'string', default: 'lean' },
     orders: { type: 'string', default: '2' },
+    options: { type: 'string', default: 'text' },               // text | json (Jev: options as prose or as JSON fields)
   },
 });
 setLayout(args.layout);
 setFilterFlagged(!args['no-filter']);
 setStateStyle(args.state);
+setOptionFormat(args.options);
 setOrderCount(Number(args.orders));
 
 const policies = args['prompts-only'] ? [] : args.policy === 'both' ? ['jev', 'openai'] : args.policy === 'none' ? [] : [args.policy];
